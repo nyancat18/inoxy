@@ -226,6 +226,8 @@ echo "CONFIGURANDOOOOOOOO"
     -Duse_system_libevent=1
     -Duse_system_libjpeg=1
     -Duse_system_libpng=1
+  #reemplaza el 0 con un 1 si falla  
+    -Duse_cups=0
     -Duse_system_libvpx=1
     -Duse_system_libxml=0
     -Duse_system_snappy=1
