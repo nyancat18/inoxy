@@ -47,7 +47,8 @@ source=(https://commondatastorage.googleapis.com/chromium-browser-official/chrom
         https://raw.githubusercontent.com/gcarq/inox-patchset/53.0.2785.101/disable-new-avatar-menu.patch
         https://raw.githubusercontent.com/gcarq/inox-patchset/53.0.2785.101/disable-first-run-behaviour.patch
         https://raw.githubusercontent.com/gcarq/inox-patchset/53.0.2785.101/product_logo_{16,22,24,32,48,64,128,256}.png
-        disable_extensions.patch)
+        disable_extensions.patch
+        chromium-cups.patch)
 
 sha256sums=('SKIP'
             '8b01fb4efe58146279858a754d90b49e5a38c9a0b36a1f84cbb7d12f92b84c28'
@@ -80,6 +81,7 @@ sha256sums=('SKIP'
             '53a1e8da18069eb4d6ab3af9c923c22a0f020241a4839c3140e3601052ddf6ff'
             '896993987d4ef9f0ac7db454f288117316c2c80ed0b6764019afd760db222dad'
             '3df9b3bbdc07fde63d9e400954dcc6ab6e0e5454f0ef6447570eef0549337354'
+            'SKIP'
             'SKIP')
 
 # We can't build (P)NaCL on i686 because the toolchain is x86_64 only and the
@@ -108,7 +110,7 @@ prepare() {
 
   # Apply Inox patches
 echo "1"
-  patch -Np1 -i ../disable-autofill-download-manager.patch
+patch -Np1 -i ../chromium-cups.patch
 echo "2"
   patch -Np1 -i ../disable-google-url-tracker.patch
 echo "3"  
@@ -146,6 +148,9 @@ echo "16"
 echo "17"
 patch -Np1 -i ../disable_extensions.patch
  echo "18"
+patch -Np1 -i ../disable-autofill-download-manager.patch
+
+echo "19"
   ## Fix linker errors if building with -Dsafe_browsing=0
   #patch -Np1 -i ../fix-building-without-safebrowsing.patch
 
@@ -183,22 +188,21 @@ patch -Np1 -i ../disable_extensions.patch
 }
 
 build() {
-   echo "EMPEZANDO A COMPILAR"
   cd "$srcdir/chromium-launcher-$_launcher_ver"
   make PREFIX=/usr
-     cd "$srcdir/chromium-$pkgver"
-echo "CONFIGURANDOOOOOOOO"
+
+  cd "$srcdir/chromium-$pkgver"
 
   export PATH="$srcdir/python2-path:$PATH"
 
   # CFLAGS are passed through release_extra_cflags below
   export -n CFLAGS CXXFLAGS
-    
+
   # Work around bug in v8 in which GCC 6 optimizes away null pointer checks
   # https://bugs.chromium.org/p/v8/issues/detail?id=3782
   # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69234
   CFLAGS+=' '
-   
+
   local _inox_conf=(
     -Dwerror=
     -Dclang_use_chrome_plugins=0
@@ -226,8 +230,6 @@ echo "CONFIGURANDOOOOOOOO"
     -Duse_system_libevent=1
     -Duse_system_libjpeg=1
     -Duse_system_libpng=1
-  #reemplaza el 0 con un 1 si falla  
-    -Duse_cups=0
     -Duse_system_libvpx=1
     -Duse_system_libxml=0
     -Duse_system_snappy=1
